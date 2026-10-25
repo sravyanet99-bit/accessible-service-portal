@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Adapters for the Application's ports: persistence, seeding, health checks. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ServicePortal.Infrastructure.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServicePortal.Application\ServicePortal.Application.csproj" />
+  </ItemGroup>
+</Project>

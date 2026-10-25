@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+TestResults/
+node_modules/
+playwright-report/
+test-results/
+App_Data/

@@ -1,0 +1,14 @@
+{
+  "name": "service-portal-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests: keyboard journeys, reflow and automated axe-core scans against WCAG 2.2 AA.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.48.0"
+  }
+}

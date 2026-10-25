@@ -1,0 +1,43 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,html,css,js,mjs,md,props,csproj}]
+indent_size = 2
+
+[*.cs]
+# Style
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_prefer_braces = true:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_sort_system_directives_first = true
+
+# Private fields are _camelCase
+dotnet_naming_rule.private_fields.severity = warning
+dotnet_naming_rule.private_fields.symbols = private_fields
+dotnet_naming_rule.private_fields.style = underscore_camel
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibility_modifiers = private
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+
+# CA1716 flags names that are keywords in VB.NET (e.g. "Error"). This is a C#-only codebase.
+dotnet_diagnostic.CA1716.severity = none
+
+# ASP.NET Core has no SynchronizationContext, so ConfigureAwait(false) adds noise without benefit.
+dotnet_diagnostic.CA2007.severity = none
+
+[tests/**.cs]
+# Test names use underscores for readability: Method_Scenario_Expectation
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA2234.severity = none
+# Inline expected arrays read better in assertions than static fields.
+dotnet_diagnostic.CA1861.severity = none

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Service requests – Client Service Desk</title>
+  <meta name="description" content="Submit, track and manage client service requests.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314323A'/%3E%3Cpath d='M8 20c3-8 6-8 7-3s4 5 9-5' stroke='%23F4F6F5' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="masthead">
+    <div class="shell masthead__inner">
+      <a class="wordmark" href="/">
+        <svg class="wordmark__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect width="32" height="32" rx="6"></rect>
+          <path d="M8 20c3-8 6-8 7-3s4 5 9-5"></path>
+        </svg>
+        <span>Client Service Desk</span>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="masthead__nav">
+          <li><a href="#queue">Requests</a></li>
+          <li><a href="#new-request">New request</a></li>
+          <li><a href="#accessibility">Accessibility</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <div class="shell">
+      <div class="page-intro">
+        <h1>Service requests</h1>
+        <p class="page-intro__lede">Report a problem with signing, your account or billing, and follow it through to resolution.</p>
+      </div>
+
+      <!-- The queue at a glance. Each segment is a filter button; counts are real text, never colour alone. -->
+      <section class="ledger" aria-labelledby="ledger-heading">
+        <h2 id="ledger-heading" class="visually-hidden">Requests by status</h2>
+        <div id="ledger-bar" class="ledger__bar" aria-hidden="true"></div>
+        <ul id="ledger-legend" class="ledger__legend">
+          <li class="ledger__loading">Loading summary…</li>
+        </ul>
+      </section>
+
+      <div class="workspace">
+        <section id="queue" class="queue" aria-labelledby="queue-heading">
+          <div class="section-head">
+            <h2 id="queue-heading" tabindex="-1">Requests</h2>
+          </div>
+
+          <form id="queue-controls" class="filters" role="search" aria-label="Filter requests">
+            <div class="field field--search">
+              <label for="search">Search</label>
+              <p id="search-hint" class="hint">Reference, subject or requester name</p>
+              <input id="search" name="q" type="search" autocomplete="off" spellcheck="false"
+                     aria-describedby="search-hint" aria-controls="requests-table">
+            </div>
+            <div class="field">
+              <label for="status-filter">Status</label>
+              <select id="status-filter" name="status" aria-controls="requests-table">
+                <option value="">All statuses</option>
+              </select>
+            </div>
+            <div class="filters__actions">
+              <button type="reset" class="button button--quiet">Clear filters</button>
+            </div>
+          </form>
+
+          <p id="results-summary" class="results-summary">Loading requests…</p>
+
+          <div class="table-scroll" role="region" aria-labelledby="requests-caption" tabindex="0">
+            <table id="requests-table" class="data-table" aria-describedby="results-summary">
+              <caption id="requests-caption" class="visually-hidden">
+                Service requests. Columns with buttons can be sorted.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" data-sort-key="reference">
+                    <button type="button" class="sort" data-sort="reference">Reference<span class="sort__icon" aria-hidden="true"></span></button>
+                  </th>
+                  <th scope="col">Subject</th>
+                  <th scope="col" data-sort-key="priority">
+                    <button type="button" class="sort" data-sort="priority">Priority<span class="sort__icon" aria-hidden="true"></span></button>
+                  </th>
+                  <th scope="col" data-sort-key="status">
+                    <button type="button" class="sort" data-sort="status">Status<span class="sort__icon" aria-hidden="true"></span></button>
+                  </th>
+                  <th scope="col" data-sort-key="createdAt" aria-sort="descending">
+                    <button type="button" class="sort" data-sort="createdAt">Submitted<span class="sort__icon" aria-hidden="true"></span></button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="requests-body"></tbody>
+            </table>
+          </div>
+
+          <nav id="pagination" class="pagination" aria-label="Pagination" hidden></nav>
+        </section>
+
+        <section id="new-request" class="intake" aria-labelledby="intake-heading">
+          <div class="section-head">
+            <h2 id="intake-heading">New request</h2>
+            <p class="hint">All fields are required unless marked optional.</p>
+          </div>
+
+          <div id="submission-banner" class="notice notice--success" tabindex="-1" aria-labelledby="submission-title" hidden>
+            <h3 id="submission-title" class="notice__title"></h3>
+            <p class="notice__body">We've added it to the queue. You'll get an email when its status changes.</p>
+            <button type="button" id="view-submitted" class="button button--secondary">View request</button>
+          </div>
+
+          <div id="error-summary" class="error-summary" tabindex="-1" aria-labelledby="error-summary-title" hidden>
+            <h3 id="error-summary-title">There is a problem</h3>
+            <ul id="error-summary-list"></ul>
+          </div>
+
+          <form id="request-form" novalidate>
+            <fieldset class="group">
+              <legend class="group__legend">About the problem</legend>
+
+              <div class="field" data-field="subject">
+                <label for="subject">Subject</label>
+                <p id="subject-hint" class="hint">A short summary, for example "Signing link has expired".</p>
+                <p id="subject-error" class="field-error" hidden></p>
+                <input id="subject" name="subject" type="text" aria-describedby="subject-hint" required>
+              </div>
+
+              <div class="field" data-field="category">
+                <label for="category">Category</label>
+                <p id="category-error" class="field-error" hidden></p>
+                <select id="category" name="category" required>
+                  <option value="">Choose a category</option>
+                </select>
+              </div>
+
+              <div class="field" data-field="priority">
+                <fieldset id="priority" class="choice-group">
+                  <legend>Priority</legend>
+                  <p id="priority-error" class="field-error" hidden></p>
+                  <div id="priority-options" class="choice-group__options"></div>
+                </fieldset>
+              </div>
+
+              <div class="field" data-field="description">
+                <label for="description">What happened?</label>
+                <p id="description-hint" class="hint">Include what you were trying to do, what you expected, and what happened instead.</p>
+                <p id="description-error" class="field-error" hidden></p>
+                <textarea id="description" name="description" rows="6" required
+                          aria-describedby="description-hint description-count"></textarea>
+                <p id="description-count" class="char-count"></p>
+              </div>
+            </fieldset>
+
+            <fieldset class="group">
+              <legend class="group__legend">Your contact details</legend>
+
+              <div class="field" data-field="requesterName">
+                <label for="requesterName">Full name</label>
+                <p id="requesterName-error" class="field-error" hidden></p>
+                <input id="requesterName" name="requesterName" type="text" autocomplete="name" required>
+              </div>
+
+              <div class="field" data-field="requesterEmail">
+                <label for="requesterEmail">Email address</label>
+                <p id="requesterEmail-hint" class="hint">We'll only use this to update you about this request.</p>
+                <p id="requesterEmail-error" class="field-error" hidden></p>
+                <input id="requesterEmail" name="requesterEmail" type="email" autocomplete="email"
+                       spellcheck="false" aria-describedby="requesterEmail-hint" required>
+              </div>
+
+              <div class="field" data-field="requesterPhone">
+                <label for="requesterPhone">Phone number (optional)</label>
+                <p id="requesterPhone-hint" class="hint">For example, 803 555 0142.</p>
+                <p id="requesterPhone-error" class="field-error" hidden></p>
+                <input id="requesterPhone" name="requesterPhone" type="tel" autocomplete="tel"
+                       inputmode="tel" aria-describedby="requesterPhone-hint" class="input--narrow">
+              </div>
+            </fieldset>
+
+            <div class="form-actions">
+              <button id="submit-request" type="submit" class="button button--primary">
+                <span class="spinner" aria-hidden="true"></span>
+                <span class="button__label">Submit request</span>
+              </button>
+              <button type="reset" class="button button--quiet">Clear form</button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <section id="accessibility" class="statement" aria-labelledby="statement-heading">
+        <h2 id="statement-heading">Accessibility</h2>
+        <p>This service is designed to meet <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> 2.2 Level AA and Section 508. It works with a keyboard alone, with screen readers, at 400% zoom, and in high-contrast modes.</p>
+
+        <div class="disclosure">
+          <h3 class="disclosure__heading">
+            <button type="button" class="disclosure__toggle" aria-expanded="false" aria-controls="keyboard-help">
+              <span class="disclosure__icon" aria-hidden="true"></span>Keyboard shortcuts and tips
+            </button>
+          </h3>
+          <div id="keyboard-help" class="disclosure__panel" hidden>
+            <ul>
+              <li><kbd>Tab</kbd> and <kbd>Shift</kbd> + <kbd>Tab</kbd> move between controls.</li>
+              <li>Arrow keys move between priority options.</li>
+              <li><kbd>Enter</kbd> or <kbd>Space</kbd> activate buttons, including column sorting.</li>
+              <li><kbd>Escape</kbd> closes a dialog and returns you to where you were.</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>Found a barrier? Submit a request in the "Accessibility barrier" category and we will respond within two business days.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="shell">
+      <p>Client Service Desk, a portfolio project by Manoj.</p>
+    </div>
+  </footer>
+
+  <!-- Announcers: present from page load so assistive technology registers them. -->
+  <div id="announcer-polite" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div id="announcer-assertive" class="visually-hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Request details. Content is rendered by js/features/request-details.js. -->
+  <dialog id="details-dialog" class="dialog dialog--wide" aria-labelledby="details-title">
+    <div id="details-content"></div>
+  </dialog>
+
+  <dialog id="confirm-dialog" class="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+    <form method="dialog">
+      <h2 id="confirm-title" class="dialog__title">Delete request?</h2>
+      <p id="confirm-body"></p>
+      <div class="form-actions">
+        <button value="cancel" class="button button--secondary" autofocus>Keep request</button>
+        <button value="confirm" class="button button--danger">Delete request</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Use cases, validation and contracts. Depends on Domain only (plus DI/logging abstractions). -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServicePortal.Domain\ServicePortal.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ServicePortal.Application.Tests" />
+  </ItemGroup>
+</Project>
